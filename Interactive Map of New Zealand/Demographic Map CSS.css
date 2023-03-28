@@ -1,0 +1,137 @@
+body { margin: 0; padding: 0; }
+#map { 
+    position: absolute;
+    left: 22%; 
+    right:22%; 
+    height: 100%;
+    z-index: 0; 
+    border-color: whitesmoke;
+    border-width: 1px;
+    border-style: solid;
+}
+#legend { width: 276px;}
+#sidebarRight{
+    position: absolute right;
+    height: 100%;
+    background:#161945;
+    float: right;
+    width: 22%;
+    overflow: auto;
+    z-index: 1;
+    border-width: 1px;
+    border-style: solid;
+}
+#menu {
+    position: absolute;
+    background: #161945;
+    color: white;
+    padding: 20px;
+    width: 22%;
+    height: 8.3%;
+    text-align: center;
+    border-width: 1px;
+    border-style: solid;
+    font-size: 1vw;
+    
+}
+#RegionText{
+    text-align: right;
+}
+#SA2Text{
+    text-align: left;
+}
+#sidebarLeft{
+        position: absolute left;
+        height: 100%;
+        background:#161945;
+        float: left;
+        width: 22%;
+        overflow: auto;
+        z-index: 1;
+        border-color: whitesmoke;
+        border-width: 1px;
+        border-style: solid;
+}
+
+#barchart-population{ 
+    width: 22%;
+    height: 40%;
+    position: absolute;
+    z-index: 2;
+    background-color: transparent;
+    top: 70%;
+    border-color: whitesmoke;
+    border-width: 1px;
+    border-style: solid;
+}
+#piechart{ 
+    width: 22%;
+    height: 32%;
+    position: absolute;
+    z-index: 2;
+    background-color: transparent;
+    top: 38%;
+    border-color: whitesmoke;
+    border-width: 1px;
+    border-style: solid;
+
+}
+#radialchart{
+    position: absolute;
+    width: 22%;
+    height: 30%;
+    z-index: 2;
+    background-color: transparent;
+    top: 8.2%;
+    border-color: whitesmoke;
+    border-width: 1px;
+    border-style: solid;
+
+}
+#HouseBar{
+    position: absolute;
+    top: 67%;
+    width: 22%;
+    height: 33%;
+    right: 0%;
+    border-color: whitesmoke;
+    border-width: 1px;
+    border-style: solid;
+}
+#PopulationRadial{
+    position: absolute;
+    top: 0%;
+    width: 22%;
+    height: 30%;
+    right: 0%;
+    border-color: whitesmoke;
+    border-width: 1px;
+    color: white;
+    border-style: solid;
+    text-align: center;
+    display: block;
+    font-size: 1vw;
+}
+#HousePrice{
+    position: absolute;
+    top: 30%;
+    color: white;
+    width: 22%;
+    height: 37%;
+    right: 0%;
+    border-color: whitesmoke;
+    border-width: 1px;
+    border-style: solid;
+}
+#HousePrice {
+    text-align: center;
+    color: white;
+    display: block;
+    font-size: 1vw;
+}
+#changeColour{
+    fill: blue;
+}
+#PersonNumber{
+    font-size: 1vw;
+}

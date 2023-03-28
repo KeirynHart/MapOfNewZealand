@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Interactive Map of New Zealand</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+    <link
+      href="https://api.mapbox.com/mapbox-assembly/v0.24.0/assembly.min.css"
+      rel="stylesheet"
+    />
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css' type='text/css' />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script
+      async
+      defer
+      src="https://api.mapbox.com/mapbox-assembly/v0.24.0/assembly.js"
+    ></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.js"></script>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/@turf/turf/turf.min.js"></script>
+    <link rel="stylesheet" href="Demographic Map CSS.css" />
+    <!-- c3 for charting, based on d3 -->
+    <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.20/c3.css"
+    rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.20/c3.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js"></script>
+</head>
+<body>
+    <!--- Mapbox initialization stuff --->
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js'></script>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css' type='text/css' />
+    <script>
+        const config = {
+        HP: 'Avg_House_',
+        
+        field: [
+            'Value',
+        ],
+    }
+    </script>
+    <!--- menu selector for region and suburb --->
+    <div class="viewport-full relative scroll-hidden">
+        <div id="menu">
+            <input id="mapbox://styles/keirynhart/cksgs447k6rys17mjr9ww47zf", type="radio" name="rtoggle" value="light">
+            <label class="SA2Text" for="mapbox://styles/keirynhart/cksgs447k6rys17mjr9ww47zf">Suburb</label>
+            <input id="mapbox://styles/keirynhart/cksf6ciun881918s3hm8u9le3" type="radio" name="rtoggle" value="light">
+            <label class="RegionText" for="mapbox://styles/keirynhart/cksf6ciun881918s3hm8u9le3">Region</label>
+        </div>
+        <!--- initialization of all of the graphs and scorecards on the left and right sides --->
+        <div id = "barchart-population" class="absolute">
+            <script>
+                var options = {
+                chart: {
+                    type: 'bar',
+                    height: "30%",
+                    foreColor: 'white',
+                },
+                title: {
+                    text: 'Level of Income in the area',
+                    align: 'Center',
+                },
+                series: [{
+                    name: '',
+                    data: []
+                }],
+                xaxis: {
+                    categories: []
+                },
+                dataLabels: {
+                enabled: false},
+                }
+                var chart = new ApexCharts(document.querySelector("#barchart-population"), options);
+
+                chart.render();
+            </script>
+        </div>
+
+        <div id = "piechart" class="absolute">
+            <script>
+                var options = {
+                    series: [],
+                    chart: {
+                    type: 'polarArea',
+                    height: "30%",
+                    foreColor: 'white',
+                    },
+                    title: {
+                    text: 'Families and Children',
+                    align: 'Center',
+                    },
+                    stroke: {
+                    colors: ['#fff']
+                    },
+                    fill: {
+                    opacity: 0.8
+                    }
+                }
+                var PieChart = new ApexCharts(document.querySelector("#piechart"), options);
+                PieChart.render();
+            </script>
+        </div>
+        <div id='radialchart' class='absolute'>
+            <script> 
+               var options = {
+                series: [],
+                chart: {
+                height: "30%",
+                type: 'radialBar',
+                foreColor: 'white'
+                },
+                title: {
+                    text: 'Percentage of Population Working',
+                    align: 'Center',
+                },
+                plotOptions: {
+                radialBar: {
+                    hollow: {
+                    image: 'White Briefcase.svg',
+                    imageWidth: 100,
+                    imageHeight: 100,
+                    imageClipped: false,
+                    margin: 15,
+                    size: '70%',
+                    },
+                    dataLabels: {
+                    name: {
+                        show: true,
+                        color: 'white'
+                    },
+                    value: {
+                        show: true,
+                        color: 'white',
+                        offsetY: 70,
+                        fontSize: '22px'
+                    }
+                    }
+                }
+                },
+
+                };
+
+                var radialchart = new ApexCharts(document.querySelector("#radialchart"), options);
+                radialchart.render(); 
+            </script>
+        </div>
+        <div id = 'HouseBar' class='absolute'>
+            <script>
+                var options = {
+                chart: {
+                    type: 'bar',
+                    height: "30%",
+                    width: "100%",
+                    foreColor: 'white',
+                },
+                title: {
+                    text: 'Number of Houses',
+                    align: 'Center',
+                },
+                series: [{
+                    name: '',
+                    data: []
+                }],
+                
+                bar: {
+                    columnWidth: '60%'
+                },
+
+                xaxis: {
+                    categories: []
+                },
+                dataLabels: {
+                enabled: false},
+                }
+                var hoschart = new ApexCharts(document.querySelector("#HouseBar"), options);
+
+                hoschart.render();
+            </script>
+        </div>
+        <div id = 'PopulationRadial' class = 'absolute'>
+            <br>
+            <b>
+              Population
+            </b>
+            <br><br><br><image src= 'white person.svg' alt='Person' class='changeColour'></image><br><br>
+            
+            <b id = 'PersonNumber'>
+                -
+            </b>
+        </div>
+        <div id = 'HousePrice' class='absolute'>
+            <br>
+            <b id = 'TitleChange'>
+              Median House Price
+            </b>
+            <br><br><br><br><image src= 'white house price.svg' alt='House Price' id='iconChange'></image><br><br><br>
+            
+            <b id = 'HousePriceNumber'>
+                -
+            </b>
+            <script>
+                
+
+            </script>
+        </div>
+        <div id="sidebarLeft">
+            <div class="flex-parent flex-parent--column viewport-half h-auto-ml hmax-full bg-orange round-ml shadow-darken10 events-all"></div>
+        </div>
+        <div id="sidebarRight">
+            <div class="flex-parent flex-parent--column viewport-half h-auto-ml hmax-full bg-orange round-ml shadow-darken10 events-all"></div>
+        </div>
+        
+        <div id="map"></div>
+            <!--- this is the mapbox access information, including access token, beginning style, etc --->
+            <script>
+                //necessary mapbox information 
+                mapboxgl.accessToken = 'pk.eyJ1Ijoia2VpcnluaGFydCIsImEiOiJja3I0M2JlY2kxbjYwMndsZG1hNG11ZXAyIn0.bsFJhTBM92Ye86J5RCXLfQ';
+                var map = new mapboxgl.Map({
+                    container: 'map', // container ID
+                    style: {
+                    version: 8,
+                    sources: {
+
+                    },
+                    layers: [
+                    {
+                        id: 'backgroundColour',
+                        type: 'background',
+                        paint: { 
+                        'background-color': '#161945' 
+                        }
+                    }
+                    ]
+
+                },
+                });
+                
+                var layerList = document.getElementById('menu');
+                var inputs = layerList.getElementsByTagName('input');
+
+                console.log(inputs)
+                
+                //switch layers function
+                function switchLayer(layer) {
+                    var layerId = layer.target.id;
+                    map.setStyle(layerId); 
+                    
+                };
+                
+                for (var i = 0; i < inputs.length; i++) {
+                    console.log(inputs[i])
+                    inputs[i].onclick = switchLayer;
+                    var name = inputs[i];
+                };
+
+                // first click function that is focused on the regions map.
+                map.on('click', 'NZ-Regions', function(e){
+                    var mike = e.point;
+                    coords = e.lngLat;
+                    var features = map.queryRenderedFeatures(mike, {layers: ["NZ-Regions"]});
+                    console.log(features);
+                    const uniqueIcons = new Set();
+                    features.forEach((item) => {
+                        uniqueIcons.add(item.properties.icon);
+                        var population = item.properties['Population'];
+                        var region = item.properties['REGC2015_1'];
+                        var z = item.properties['Zero_incom'];
+                        var b1 = item.properties['F_1__5_000'];
+                        var b2 = item.properties['F_5_001__1'];
+                        var b3 = item.properties['F_10_001__'];
+                        var b4 = item.properties['F_15_001__'];
+                        var b5 = item.properties['F_20_001__'];
+                        var b6 = item.properties['F_25_001__'];
+                        var b7 = item.properties['F_30_001__'];
+                        var b8 = item.properties['F_35_001__'];
+                        var b9 = item.properties['F_40_001__'];
+                        var b10 = item.properties['F_50_001__'];
+                        var b11 = item.properties['F_60_001__'];
+                        var b12 = item.properties['F_70_001__'];
+                        var b13 = item.properties['F_100_001_'];
+                        var b14 = item.properties['F_150_001_'];
+                        var families = item.properties['Families'];
+                        var children = item.properties['dependent_'];
+                        var employees = item.properties['EmpLegit'];
+                        var houses = item.properties['houses'];
+                        var age = item.properties['Median_Age'];
+                        var HouseP = item.properties['Average_Ho'];
+                        console.log(age, employees, families, z, b7);
+                        [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen] = [z, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14];
+                        reg = region;
+                        fam = families;
+                        child = children;
+                        med_age = age;
+                        hos = houses;
+                        emp = employees;
+                        emp_perc = (employees/population) * 100;
+                        emp_perc = Math.round(emp_perc);
+                        HP = HouseP.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                        pop = population.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    });
+                    
+                    document.getElementById("HousePriceNumber").innerHTML = "NZD $" + HP ;
+                    document.getElementById("PersonNumber").innerHTML = pop + " People in " + reg;
+                    document.getElementById("TitleChange").innerHTML = "Median House Price";
+                    var image = document.getElementById("iconChange");
+                        image.src = "White house price.svg"
+
+                    console.log(reg);
+                    //first bar chart for income bands
+                    var options = {
+                        chart: {
+                            type: 'bar'
+                        },
+                        series: [{
+                        name: [],
+                        data: [zero,one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen],
+                        
+                    }],
+                        
+                        xaxis: {
+                        categories: ['zero','1-5k','5-10k','10-15k','15-20k','20-25k','20-25k','30-35k','35-40k','40-50k','50-60k','60-70k','70-100k','100-150k','150k+']
+                        },
+                    };
+                    
+                    chart.updateOptions(options, redrawPaths = false)
+
+                    //Second chart for Families and Children
+                    var pieoptions = {
+                        series: [fam, child],
+                        labels:['Family', 'Children'],
+                        chart: {
+                        type: 'polarArea',
+                    },
+                        stroke: {
+                        colors: ['#fff']
+                    },
+                        fill: {
+                        opacity: 0.8
+                    }   
+                                   
+                    }
+                    PieChart.updateOptions(pieoptions, redrawPaths = false)
+                    //Third Chart concerned with employees and possibly population
+                    var radoptions = {
+                        series: [emp_perc],
+                        labels:['Employees'],
+                        chart: {
+                        type: 'radialBar',
+                    },
+                        stroke: {
+                        colors: ['blue']
+                    },
+                    labels: ['Volatility'],
+                        fill: {
+                        opacity: 0.8
+                    }, stroke: {
+                        lineCap: 'round'
+                        },
+                        plotOptions: {
+                    radialBar: {
+                        hollow: {
+                        imageClipped: false,
+                        size: '70%',
+                        },
+                        dataLabels: {
+                        name: {
+                            show: false,
+                            color: 'white'
+                        },
+                        value: {
+                            show: true,
+                            color: '#FFF',
+                            offsetY: 70,
+                            fontSize: '22px'
+                        }
+                        }
+                        }
+                    },                                                    
+                }
+                    radialchart.updateOptions(radoptions, redrawPaths = false)
+                    
+                    //Chart concerned with number of houses
+                    var houseoptions = {
+                        chart: {
+                            type: 'bar'
+                        },
+                        series: [{
+                        name: ['Houses'],
+                        data: [hos]
+                    }],
+                        xaxis: {
+                        categories: ['Houses']
+                        },
+                        plotOptions: {
+                        radialBar: {
+                        offsetY: 0,
+                        startAngle: 0,
+                        endAngle: 270,
+                        hollow: {
+                        margin: 5,
+                        size: '30%',
+                        background: 'transparent',
+                        image: undefined,
+                        },
+                        dataLabels: {
+                        name: {
+                            show: false,
+                        },
+                        value: {
+                            show: false,
+                        }
+                        }
+                    }
+                    },
+                    
+                    };
+                    hoschart.updateOptions(houseoptions, redrawPaths = false)
+
+                });
+
+
+                //Geocoder - puts the search function in the top right hand corner of the screen
+                var geocoder = new MapboxGeocoder({ // Initialize the geocoder
+                accessToken: mapboxgl.accessToken, // Set the access token
+                mapboxgl: mapboxgl, // Set the mapbox-gl instance
+                marker: false, // Do not use the default marker style
+                });
+                map.addControl(geocoder);
+
+
+                // Second click function focused on the Suburbs map
+                map.on('click', 'SA2-Population', function (e) {
+                    var mapLayer = map.getLayer('radius-tester');
+                    if(typeof mapLayer == 'undefined'){
+                        //adding a layer to the map for the radius to be drawn at the position clicked.
+                        map.addLayer({
+                        id: 'radius-tester',
+                        source: {
+                            type: 'geojson',
+                            data:{"type": "FeatureCollection", "features": []}
+                        },
+                        type: 'fill',
+                        paint: {
+                            'fill-color': '#FF8C00',
+                            'fill-opacity': 0.5,
+                            'fill-outline-color': 'black',
+                        }
+                    }); 
+                    }
+
+
+                    function makeRadius(lngLatArray, radiusInMeters){
+                        var point = turf.point(lngLatArray);
+                        var buffered = turf.buffer(point, radiusInMeters, {units: 'meters'});
+                        return buffered;
+                    };
+
+                    function getFeatures(source, radius){
+                        var features = source.filter(function(e){
+                            return turf.booleanIntersects(e, radius);
+                        });
+                        console.log(features);
+                        return features;
+                        }
+                        var eventLngLat = [e.lngLat.lng, e.lngLat.lat];
+                        var searchRadius = makeRadius(eventLngLat, 1000);
+                        map.getSource('radius-tester').setData(searchRadius);
+                        var features = map.queryRenderedFeatures({layers: ["SA2-Population"]});
+                        var results = getFeatures(features, searchRadius);
+
+                        const icons = new Set();
+                        results.forEach((item) => {
+                            icons.add(item.properties.icon);
+                            var res = item.properties['SA22018__1'];
+                            sa2 = res;
+                        });
+                        map.flyTo({
+                            center: eventLngLat
+                        });
+
+                        var pop = 0;
+                        var poptot = 0;
+                        var fam = 0;
+                        var child = 0;
+                        var hos = 0;
+                        var emp = 0;
+                        var zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen = 0;
+                        nameArray = [];
+
+                        // below is where I have located and saved all of the relevant data to be displayed in the charts
+                        results.forEach((item) => {
+                            var population = item.properties['Population'];
+                            var region = item.properties['SA22021__1'];
+                            var z = item.properties['Zero_Incom'];
+                            var b1 = item.properties['F_1__5_000'];
+                            var b2 = item.properties['F_5_001__1'];
+                            var b3 = item.properties['F_10_001__'];
+                            var b4 = item.properties['F_15_001__'];
+                            var b5 = item.properties['F_20_001__'];
+                            var b6 = item.properties['F_25_001__'];
+                            var b7 = item.properties['F_30_001__'];
+                            var b8 = item.properties['F_35_001__'];
+                            var b9 = item.properties['F_40_001__'];
+                            var b10 = item.properties['F_50_001__'];
+                            var b11 = item.properties['F_60_001__'];
+                            var b12 = item.properties['F_70_001__'];
+                            var b13 = item.properties['F_100_001_'];
+                            var b14 = item.properties['F_150_001_'];
+                            var families = item.properties['Number_of_'];
+                            var children = item.properties['Number_of1'];
+                            var employees = item.properties['EmpLegit'];
+                            var houses = item.properties['Houses'];
+                            var businesses = item.properties['Value'];
+                            [zero, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, fourteen] = [z, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11, b12, b13, b14];
+                            zero = z;
+                            one = +b1 + +one;
+                            two = b2;
+                            three = b3;
+                            four = b4;
+                            five = b5;
+                            six = b6;
+                            seven = b7;
+                            eight = b8;
+                            nine = b9;
+                            ten = b10;
+                            eleven = b11;
+                            twelve = b12;
+                            thirteen = b13;
+                            fourteen = b14;
+                            bus = businesses;
+                            pop = population;
+                            poptot = poptot + pop;
+                            reg = region;
+                            fam = families + fam;
+                            child = children + child;
+                            hos = houses + hos;
+                            emp = employees + emp;
+                            emp_perc = (employees/population) * 100;
+                            emp_perc = Math.round(emp_perc);
+                            console.log(pop);
+                            pop_number = poptot.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                        });
+
+                        document.getElementById("PersonNumber").innerHTML = pop_number + " People Within Radius";
+                        document.getElementById("HousePriceNumber").innerHTML = bus + " Businesses Within Radius";
+                        document.getElementById("TitleChange").innerHTML = "Businesses";
+                        document.getElementById("iconChange").src == 'White business.svg';
+                        var image = document.getElementById("iconChange");
+                        image.src = "White business.svg"
+                        //console.log(pop_count);
+                    //first bar chart for income bands
+                    var options = {
+                        chart: {
+                            type: 'bar',
+                            height: "30%"
+                        },
+                        series: [{
+                        name: [],
+                        data: [zero,one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,thirteen,fourteen]
+                    }],
+                        xaxis: {
+                        categories: ['zero','1-5k','5-10k','10-15k','15-20k','20-25k','20-25k','30-35k','35-40k','40-50k','50-60k','60-70k','70-100k','100-150k','150k+']
+                        },
+                    };
+                    chart.updateOptions(options, redrawPaths = false)
+
+                    //Second chart for Families and Children
+                    var pieoptions = {
+                        series: [fam, child],
+                        labels:['Family', 'Children'],
+                        chart: {
+                            type: 'polarArea',
+                            height: "30%"
+                    },
+                        stroke: {
+                        colors: ['#fff']
+                    },
+                        fill: {
+                        opacity: 0.8
+                    }   
+                                   
+                    }
+                    PieChart.updateOptions(pieoptions, redrawPaths = false)
+                    //Third Chart concerned with employees and possibly population
+                    var radoptions = {
+                        series: [emp_perc],
+                        labels:['Employees'],
+                        chart: {
+                        type: 'radialBar',
+                        height: "30%"
+                    },
+                        stroke: {
+                        colors: ['blue']
+                    },
+                    labels: ['Volatility'],
+                        fill: {
+                        opacity: 0.8
+                    }, stroke: {
+                        lineCap: 'round'
+                        },
+                        plotOptions: {
+                    radialBar: {
+                        hollow: {
+                        margin: 15,
+                        size: '70%',
+                        },
+                        dataLabels: {
+                        name: {
+                            show: false,
+                            color: '#fff'
+                        },
+                        value: {
+                            show: true,
+                            color: '#FFF',
+                            offsetY: 70,
+                            fontSize: '22px'
+                        }
+                        }
+                        }
+                    },                                                    
+                }
+                    radialchart.updateOptions(radoptions, redrawPaths = false)
+                    
+                    //Chart concerned with number of houses
+                    var houseoptions = {
+                        chart: {
+                            type: 'bar',
+                            height: "30%"
+                        },
+                        series: [{
+                        name: ['Houses'],
+                        data: [hos]
+                    }],
+                        xaxis: {
+                        categories: ['Houses']
+                        },
+                        plotOptions: {
+                        radialBar: {
+                        offsetY: 0,
+                        startAngle: 0,
+                        endAngle: 270,
+                        hollow: {
+                        margin: 5,
+                        size: '30%',
+                        background: 'transparent',
+                        image: undefined,
+                        },
+                        dataLabels: {
+                        name: {
+                            show: false,
+                        },
+                        value: {
+                            show: false,
+                        }
+                        }
+                    }
+                    },
+                    
+                    };
+                    hoschart.updateOptions(houseoptions, redrawPaths = false)
+
+                });
+  
+            </script>
+        <div
+        id="sidebar"
+        class="absolute top-ml-10 bottom right-100 z1 w-full w300-ml px12 py12-ml events-none"
+        >
+            <div class="">
+                <div class="px12 py12">
+                    <h3 class="txt-bold">
+                    <span id="sidebar-title"></span>
+                    </h3>
+                    <p id="sidebar-description" class="none block-mm py6"></p>
+                   
+                    
+                </div>
+            </div>
+    </div>
+</body>
