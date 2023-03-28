@@ -16,5 +16,18 @@ This project required a number of moving parts in order to get everything workin
 ## HTML, Javascript & CSS were used to build the page and its functionality.
 ## D3.js was used for the data visualisations.
 
+# Document Breakdown:
+
+## Interactive Demographic Map of New Zealand.html:
+This file is the main file that can be opened to interact with the demographic map.
+
+## Demographic Map CSS.css:
+This file is the supporting CSS file.
+
+## SVG Images:
+These are the basic svg icons that you see on the interface.
+
+
+
 
 
